@@ -20,6 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _bottomNavigationBar() {
     return BottomNavigationBar(
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: Colors.grey,
+      currentIndex: _currentIndex,
       onTap: (value) => setState(() {
         _currentIndex = value;
       }),
