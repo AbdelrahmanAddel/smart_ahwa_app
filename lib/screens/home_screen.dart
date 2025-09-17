@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_qhwa/screens/add_order_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,9 +13,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: _bottomNavigationBar(),
-      body: _currentIndex == 0 ? Container() : Placeholder(),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(),
+        bottomNavigationBar: _bottomNavigationBar(),
+        body: _currentIndex == 0 ? AddOrderScreen() : Placeholder(),
+      ),
     );
   }
 
