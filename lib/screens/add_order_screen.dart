@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:smart_qhwa/data/orders.dart';
 import 'package:smart_qhwa/models/drinks/aenab.dart';
@@ -6,11 +5,13 @@ import 'package:smart_qhwa/models/drinks/drinks.dart';
 import 'package:smart_qhwa/models/drinks/coffee.dart';
 import 'package:smart_qhwa/models/drinks/tea.dart';
 import 'package:smart_qhwa/models/order/order_model.dart';
+import 'package:smart_qhwa/widgets/custom_text_form_field.dart';
+import 'package:smart_qhwa/widgets/drink_dropdown.dart';
 
-import 'package:smart_qhwa/widgets/widgets.dart';
 
 class AddOrderScreen extends StatefulWidget {
-  const AddOrderScreen({super.key});
+  const AddOrderScreen(this._orderRepository, {super.key});
+  final OrderRepository _orderRepository;
 
   @override
   State<AddOrderScreen> createState() => _AddOrderScreenState();
@@ -22,57 +23,84 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       TextEditingController();
   bool isComplete = false;
 
-  final List<Drinks> drinks = [Coffee(), Tea(), Aenab()];
+  final List<Drinks> drinks = [Tea(), Coffee(), Aenab()];
   late Drinks selectedDrink;
 
   @override
   void initState() {
     super.initState();
-    selectedDrink = drinks[1];
+    selectedDrink = drinks.first;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: Column(
-        children: [
-          CustomTextFormField(_nameController, hintText: 'Customer Name'),
-          SizedBox(height: 30),
-          CustomTextFormField(
-            _specialInstructionsController,
-            hintText: 'special instructions',
-          ),
-          SizedBox(height: 30),
-          Flexible(
-            child: DrinkDropdown(
-              onChanged: (value) {
-                setState(() {
-                  selectedDrink = value!;
-                });
-              },
-              value: selectedDrink,
-              drinks: drinks,
+    return Scaffold(
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    CustomTextFormField(
+                      _nameController,
+                      hintText: 'Customer Name',
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextFormField(
+                      _specialInstructionsController,
+                      hintText: 'Special Instructions',
+                    ),
+                    const SizedBox(height: 20),
+                    DrinkDropdown(
+                      value: selectedDrink,
+                      drinks: drinks,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedDrink = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 30),
-          _orderCompleteWidget(),
-          SizedBox(height: 30),
-          MaterialButton(
-            minWidth: double.infinity,
-            height: 50,
-            color: Colors.blueAccent,
-            shape: StadiumBorder(),
-            onPressed: () {
-              _addOrder();
-              _restData();
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(selectedDrink.make())));
-            },
-            child: Text('Add Order', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+            const SizedBox(height: 30),
+            _orderCompleteWidget(),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  shape: const StadiumBorder(),
+                ),
+                onPressed: () {
+                  _addOrder();
+                  _resetData();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("${selectedDrink.make()} added!"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Add Order',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,8 +109,11 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Order Complete', style: TextStyle(fontSize: 20)),
-        SizedBox(width: 10),
+        const Text(
+          'Order Complete',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(width: 10),
         Checkbox(
           value: isComplete,
           onChanged: (value) {
@@ -97,7 +128,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   }
 
   void _addOrder() {
-    Orders.orders.add(
+    widget._orderRepository.addOrder(
       OrderModel(
         _nameController.text,
         _specialInstructionsController.text,
@@ -108,11 +139,12 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
     );
   }
 
-  void _restData() {
+  void _resetData() {
     _specialInstructionsController.clear();
     _nameController.clear();
     setState(() {
       isComplete = false;
+      selectedDrink = drinks.first;
     });
   }
 }
